@@ -24,7 +24,6 @@ app.use('/repositories/:id', validateRepoId);
 
 const repositories = [];
 
-
 app.get("/repositories", (request, response) => {
   // Get information from query (url)
   const {title} = request.query
@@ -72,7 +71,8 @@ app.put("/repositories/:id", (request, response) => {
     id,
     title,
     url,
-    techs
+    techs,
+    likes: repositories[repoIndex].likes
   }
 
   // Replace the new data
@@ -104,7 +104,26 @@ app.delete("/repositories/:id", (request, response) => {
 });
 
 app.post("/repositories/:id/like", (request, response) => {
+  // Receive the id of the registry from params (url)
+  const { id } = request.params
+
+  // Get all modified data (or not)
+  const { likes } = request.body
   
+  // Indentify the registry searching by id
+  const repoIndex = repositories.findIndex(repository => repository.id === id)
+
+  // Check if id don't exists
+  if (repoIndex < 0){
+    // Return error if the data don't exists
+    return response.status(400).json({error: 'Repository not found'})
+  }
+
+  // Replace the new data
+  repositories[repoIndex].likes++
+
+  // Show the result
+  return response.json(repositories[repoIndex])
 
 });
 
