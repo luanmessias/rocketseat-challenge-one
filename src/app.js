@@ -19,6 +19,7 @@ app.use(cors());
 app.use('/repositories/:id', validateRepoId);
 
 const repositories = [];
+const tecnologies = [];
 
 app.get('/repositories', (request, response) => {
   const { title } = request.query;
@@ -43,7 +44,7 @@ app.post('/repositories', (request, response) => {
 app.put('/repositories/:id', (request, response) => {
   const { id } = request.params;
 
-  const { title, url, techs, likes } = request.body;
+  const { title, url, techs } = request.body;
 
   const repoIndex = repositories.findIndex(
     (repository) => repository.id === id
@@ -85,8 +86,6 @@ app.delete('/repositories/:id', (request, response) => {
 app.post('/repositories/:id/like', (request, response) => {
   const { id } = request.params;
 
-  const { likes } = request.body;
-
   const repoIndex = repositories.findIndex(
     (repository) => repository.id === id
   );
@@ -98,6 +97,64 @@ app.post('/repositories/:id/like', (request, response) => {
   repositories[repoIndex].likes += 1;
 
   return response.json(repositories[repoIndex]);
+});
+
+// Techs
+
+app.get('/techs', (request, response) => {
+  const { title } = request.query;
+
+  const results = title
+    ? tecnologies.filter((tech) => tech.title.includes(title))
+    : tecnologies;
+
+  return response.json(results);
+});
+
+app.post('/techs', (request, response) => {
+  const { title, color } = request.body;
+
+  const tech = { id: uuid(), title, color };
+
+  tecnologies.push(tech);
+
+  return response.json(tech);
+});
+
+app.put('/techs/:id', (request, response) => {
+  const { id } = request.params;
+
+  const { title, color } = request.body;
+
+  const techIndex = tecnologies.findIndex((tech) => tech.id === id);
+
+  if (techIndex < 0) {
+    return response.status(400).json({ error: 'Tecnology not found' });
+  }
+
+  const tech = {
+    id,
+    title,
+    color,
+  };
+
+  tecnologies[techIndex] = tech;
+
+  return response.json(tech);
+});
+
+app.delete('/techs/:id', (request, response) => {
+  const { id } = request.params;
+
+  const techIndex = tecnologies.findIndex((tech) => tech.id === id);
+
+  if (techIndex < 0) {
+    return response.status(400).json({ error: 'Tecnology not found' });
+  }
+
+  tecnologies.splice(techIndex, 1);
+
+  return response.status(204).send().json({});
 });
 
 module.exports = app;
